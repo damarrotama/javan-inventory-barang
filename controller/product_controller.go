@@ -89,7 +89,7 @@ func (c *productController) CreateProduct(ctx *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "Product ID" format(uuid)
-// @Param body body UpdateProductRequest true "Payload"
+// @Param body body model.ProductAPI true "Payload"
 // @Success 200 {object} model.Product
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string

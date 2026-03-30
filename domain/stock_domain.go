@@ -10,8 +10,8 @@ import (
 	"javan-inventory-barang/lib"
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/repository"
-	"javan-inventory-barang/transaction"
 	"javan-inventory-barang/utils/logger"
+	"javan-inventory-barang/utils/transaction"
 )
 
 // Sentinel errors for stock movement validation.

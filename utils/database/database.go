@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
@@ -32,6 +33,29 @@ func OpenPostgres() (*gorm.DB, error) {
 			return nil, fmt.Errorf("auto migrate: %w", err)
 		}
 	}
+
+	seeds := migrations.DataSeeds()
+	if len(seeds) > 0 {
+		for i := range seeds {
+			tx := db.Begin()
+
+			defer func() {
+				if r := recover(); r != nil {
+					tx.Rollback()
+				}
+			}()
+
+			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(seeds[i]).Error; nil != err {
+				tx.Rollback()
+			}
+
+			if err := tx.Commit().Error; nil != err {
+				tx.Rollback()
+			}
+		}
+	}
+
+	db.Migrator().DropTable("schema_migration")
 
 	if nil != db {
 		sqlDB, _ := db.DB()

@@ -7,9 +7,9 @@ import (
 
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/repository"
-	"javan-inventory-barang/transaction"
 	"javan-inventory-barang/utils/logger"
 	"javan-inventory-barang/utils/resp"
+	"javan-inventory-barang/utils/transaction"
 )
 
 // ProductDomain defines product use cases.

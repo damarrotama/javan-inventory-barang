@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"javan-inventory-barang/model"
-	"javan-inventory-barang/transaction"
 	"javan-inventory-barang/utils/logger"
+	"javan-inventory-barang/utils/transaction"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

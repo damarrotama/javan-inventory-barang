@@ -66,7 +66,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.CreateProductRequest"
+                            "$ref": "#/definitions/model.ProductAPI"
                         }
                     }
                 ],
@@ -179,7 +179,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.UpdateProductRequest"
+                            "$ref": "#/definitions/model.ProductAPI"
                         }
                     }
                 ],
@@ -267,55 +267,273 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/stocks": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stocks"
+                ],
+                "summary": "List all current stock levels",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Stock"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stocks/histories": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stock-histories"
+                ],
+                "summary": "List all stock movement history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StockHistory"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stocks/histories/product/{product_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stock-histories"
+                ],
+                "summary": "List stock movement history for a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Product ID",
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StockHistory"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stocks/movement": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stocks"
+                ],
+                "summary": "Record a stock IN or OUT movement",
+                "parameters": [
+                    {
+                        "description": "Movement payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.StockMovementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.StockMovementResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stocks/product/{product_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stocks"
+                ],
+                "summary": "Get current stock level for a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Product ID",
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Stock"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "controller.CreateProductRequest": {
+        "domain.StockMovementRequest": {
             "type": "object",
             "properties": {
-                "description": {
+                "movement_type": {
+                    "$ref": "#/definitions/model.StockMovementType"
+                },
+                "note": {
                     "type": "string"
                 },
-                "name": {
+                "product_id": {
                     "type": "string"
                 },
-                "sku": {
-                    "type": "string"
+                "quantity": {
+                    "type": "number"
                 },
-                "unit": {
+                "reference": {
                     "type": "string"
                 }
             }
         },
-        "controller.UpdateProductRequest": {
+        "domain.StockMovementResponse": {
             "type": "object",
             "properties": {
-                "description": {
+                "message": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "sku": {
-                    "type": "string"
-                },
-                "unit": {
-                    "type": "string"
+                "stock": {
+                    "$ref": "#/definitions/model.Stock"
                 }
             }
         },
         "model.Product": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "string",
-                    "format": "uuid"
                 },
                 "name": {
                     "type": "string"
@@ -325,11 +543,75 @@ const docTemplate = `{
                 },
                 "unit": {
                     "type": "string"
+                }
+            }
+        },
+        "model.ProductAPI": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
                 },
-                "updated_at": {
+                "name": {
+                    "type": "string"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "unit": {
                     "type": "string"
                 }
             }
+        },
+        "model.Stock": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.StockHistory": {
+            "type": "object",
+            "properties": {
+                "movement_type": {
+                    "$ref": "#/definitions/model.StockMovementType"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity_after": {
+                    "type": "number"
+                },
+                "quantity_delta": {
+                    "type": "number"
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "stock_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.StockMovementType": {
+            "type": "string",
+            "enum": [
+                "IN",
+                "OUT",
+                "ADJUSTMENT"
+            ],
+            "x-enum-varnames": [
+                "StockMovementIn",
+                "StockMovementOut",
+                "StockMovementAdjustment"
+            ]
         }
     }
 }`
