@@ -1,12 +1,14 @@
 package model
 
-import (
-	"time"
-)
+import "github.com/google/uuid"
 
 type Stock struct {
-	ID        int64     `db:"id"`
-	ProductID int64     `db:"product_id"`
-	Quantity  float64   `db:"quantity"`
-	UpdatedAt time.Time `db:"updated_at"`
+	Base
+	ProductID *uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex" json:"product_id"`
+	Quantity  float64    `gorm:"not null;default:0" json:"quantity"`
+}
+
+// TableName returns the GORM table name.
+func (Stock) TableName() string {
+	return "stocks"
 }
