@@ -18,14 +18,18 @@ type Service struct {
 
 type Controller struct {
 	ProductController controller.ProductController
+	StockController   controller.StockController
 }
 
 type Domain struct {
 	ProductDomain domain.ProductDomain
+	StockDomain   domain.StockDomain
 }
 
 type Repository struct {
-	ProductRepository repository.ProductRepository
+	ProductRepository      repository.ProductRepository
+	StockRepository        repository.StockRepository
+	StockHistoryRepository repository.StockHistoryRepository
 }
 
 // NewService wires repositories, domain, and controllers to a shared DB pool.
@@ -44,22 +48,30 @@ func NewService() *Service {
 
 	// repositories
 	productRepo := repository.NewProductRepository(logger, db)
+	stockRepo := repository.NewStockRepository(db)
+	stockHistoryRepo := repository.NewStockHistoryRepository(db)
 
 	// domains
 	productDomain := domain.NewProductDomain(logger, txManager, productRepo)
+	stockDomain := domain.NewStockDomain(stockRepo, stockHistoryRepo, productRepo, txManager)
 
 	// controllers
 	productController := controller.NewProductController(productDomain)
+	stockController := controller.NewStockController(stockDomain)
 
 	return &Service{
 		Controller: Controller{
 			ProductController: productController,
+			StockController:   stockController,
 		},
 		Domain: Domain{
 			ProductDomain: productDomain,
+			StockDomain:   stockDomain,
 		},
 		Repository: Repository{
-			ProductRepository: productRepo,
+			ProductRepository:      productRepo,
+			StockRepository:        stockRepo,
+			StockHistoryRepository: stockHistoryRepo,
 		},
 	}
 }

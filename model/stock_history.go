@@ -20,3 +20,8 @@ const (
 	StockMovementOut        StockMovementType = "OUT"
 	StockMovementAdjustment StockMovementType = "ADJUSTMENT"
 )
+
+// TableName returns the GORM table name.
+func (StockHistory) TableName() string {
+	return "stock_histories"
+}
