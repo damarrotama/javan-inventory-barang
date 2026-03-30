@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -12,6 +11,7 @@ import (
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/repository"
 	"javan-inventory-barang/transaction"
+	"javan-inventory-barang/utils/logger"
 )
 
 // Sentinel errors for stock movement validation.
@@ -24,11 +24,11 @@ var (
 
 // StockMovementRequest is the payload for stock IN/OUT operations.
 type StockMovementRequest struct {
-	ProductID    *uuid.UUID             `json:"product_id"`
+	ProductID    *uuid.UUID              `json:"product_id"`
 	MovementType model.StockMovementType `json:"movement_type"`
-	Quantity     float64                `json:"quantity"`
-	Reference    *string                `json:"reference,omitempty"`
-	Note         *string                `json:"note,omitempty"`
+	Quantity     float64                 `json:"quantity"`
+	Reference    *string                 `json:"reference,omitempty"`
+	Note         *string                 `json:"note,omitempty"`
 }
 
 // StockMovementResponse is returned after a successful stock movement.
@@ -47,23 +47,26 @@ type StockDomain interface {
 }
 
 type stockDomain struct {
+	logger           logger.Logger
+	txManager        transaction.Manager
 	stockRepo        repository.StockRepository
 	stockHistoryRepo repository.StockHistoryRepository
 	productRepo      repository.ProductRepository
-	txManager        transaction.Manager
 }
 
 func NewStockDomain(
+	logger logger.Logger,
+	txManager transaction.Manager,
 	stockRepo repository.StockRepository,
 	stockHistoryRepo repository.StockHistoryRepository,
 	productRepo repository.ProductRepository,
-	txManager transaction.Manager,
 ) StockDomain {
 	return &stockDomain{
+		logger:           logger,
+		txManager:        txManager,
 		stockRepo:        stockRepo,
 		stockHistoryRepo: stockHistoryRepo,
 		productRepo:      productRepo,
-		txManager:        txManager,
 	}
 }
 
@@ -163,7 +166,7 @@ func (d *stockDomain) MoveStock(ctx context.Context, req *StockMovementRequest) 
 		}
 
 		if err := d.stockHistoryRepo.Create(context.Background(), history); err != nil {
-			log.Printf("[StockHistory] failed to record history: %v", err)
+			d.logger.Error(ctx, "failed to record history", "error", err)
 		}
 	}()
 

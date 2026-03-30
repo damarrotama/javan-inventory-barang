@@ -48,12 +48,12 @@ func NewService() *Service {
 
 	// repositories
 	productRepo := repository.NewProductRepository(logger, db)
-	stockRepo := repository.NewStockRepository(db)
-	stockHistoryRepo := repository.NewStockHistoryRepository(db)
+	stockRepo := repository.NewStockRepository(logger, db)
+	stockHistoryRepo := repository.NewStockHistoryRepository(logger, db)
 
 	// domains
 	productDomain := domain.NewProductDomain(logger, txManager, productRepo)
-	stockDomain := domain.NewStockDomain(stockRepo, stockHistoryRepo, productRepo, txManager)
+	stockDomain := domain.NewStockDomain(logger, txManager, stockRepo, stockHistoryRepo, productRepo)
 
 	// controllers
 	productController := controller.NewProductController(productDomain)

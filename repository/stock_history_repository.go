@@ -4,6 +4,7 @@ import (
 	"context"
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/transaction"
+	"javan-inventory-barang/utils/logger"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -20,20 +21,22 @@ type StockHistoryRepository interface {
 }
 
 type stockHistoryRepository struct {
-	db *gorm.DB
+	logger logger.Logger
+	db     *gorm.DB
 }
 
-func NewStockHistoryRepository(db *gorm.DB) StockHistoryRepository {
-	return &stockHistoryRepository{db: db}
+func NewStockHistoryRepository(logger logger.Logger, db *gorm.DB) StockHistoryRepository {
+	return &stockHistoryRepository{logger: logger, db: db}
 }
 
 func (r *stockHistoryRepository) WithTx(tx transaction.Conn) StockHistoryRepository {
-	return &stockHistoryRepository{db: tx.Tx}
+	return &stockHistoryRepository{logger: r.logger, db: tx.Tx}
 }
 
 func (r *stockHistoryRepository) FindAll(ctx context.Context) ([]model.StockHistory, error) {
 	var histories []model.StockHistory
 	if err := r.db.WithContext(ctx).Order("created_at DESC").Find(&histories).Error; err != nil {
+		r.logger.Error(ctx, "failed to find all stock histories", "error", err)
 		return nil, err
 	}
 	return histories, nil
@@ -45,6 +48,7 @@ func (r *stockHistoryRepository) FindByProductID(ctx context.Context, productID 
 	}
 	var histories []model.StockHistory
 	if err := r.db.WithContext(ctx).Where("product_id = ?", productID).Order("created_at DESC").Find(&histories).Error; err != nil {
+		r.logger.Error(ctx, "failed to find stock histories by product id", "error", err)
 		return nil, err
 	}
 	return histories, nil
@@ -56,11 +60,16 @@ func (r *stockHistoryRepository) FindByStockID(ctx context.Context, stockID *uui
 	}
 	var histories []model.StockHistory
 	if err := r.db.WithContext(ctx).Where("stock_id = ?", stockID).Order("created_at DESC").Find(&histories).Error; err != nil {
+		r.logger.Error(ctx, "failed to find stock histories by stock id", "error", err)
 		return nil, err
 	}
 	return histories, nil
 }
 
 func (r *stockHistoryRepository) Create(ctx context.Context, history *model.StockHistory) error {
-	return r.db.WithContext(ctx).Create(history).Error
+	if err := r.db.WithContext(ctx).Create(history).Error; err != nil {
+		r.logger.Error(ctx, "failed to create stock history", "error", err)
+		return err
+	}
+	return nil
 }
