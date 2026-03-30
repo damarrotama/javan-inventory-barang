@@ -1,44 +1,81 @@
 basePath: /api/v1
 definitions:
-  controller.CreateProductRequest:
+  domain.StockMovementRequest:
     properties:
-      description:
+      movement_type:
+        $ref: '#/definitions/model.StockMovementType'
+      note:
         type: string
-      name:
+      product_id:
         type: string
-      sku:
-        type: string
-      unit:
+      quantity:
+        type: number
+      reference:
         type: string
     type: object
-  controller.UpdateProductRequest:
+  domain.StockMovementResponse:
     properties:
-      description:
+      message:
         type: string
-      name:
-        type: string
-      sku:
-        type: string
-      unit:
-        type: string
+      stock:
+        $ref: '#/definitions/model.Stock'
     type: object
   model.Product:
     properties:
-      created_at:
-        type: string
       description:
         type: string
-      id:
-        type: integer
       name:
         type: string
       sku:
         type: string
       unit:
         type: string
-      updated_at:
+    type: object
+  model.ProductAPI:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      sku:
+        type: string
+      unit:
         type: string
     type: object
+  model.Stock:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: number
+    type: object
+  model.StockHistory:
+    properties:
+      movement_type:
+        $ref: '#/definitions/model.StockMovementType'
+      note:
+        type: string
+      product_id:
+        type: string
+      quantity_after:
+        type: number
+      quantity_delta:
+        type: number
+      reference:
+        type: string
+      stock_id:
+        type: string
+    type: object
+  model.StockMovementType:
+    enum:
+    - IN
+    - OUT
+    - ADJUSTMENT
+    type: string
+    x-enum-varnames:
+    - StockMovementIn
+    - StockMovementOut
+    - StockMovementAdjustment
 host: localhost:8000
 info:
   contact:
@@ -77,7 +114,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/controller.CreateProductRequest'
+          $ref: '#/definitions/model.ProductAPI'
       produces:
       - application/json
       responses:
@@ -104,10 +141,11 @@ paths:
     delete:
       parameters:
       - description: Product ID
+        format: uuid
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       responses:
         "204":
           description: No Content
@@ -135,10 +173,11 @@ paths:
     get:
       parameters:
       - description: Product ID
+        format: uuid
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -172,16 +211,17 @@ paths:
       - application/json
       parameters:
       - description: Product ID
+        format: uuid
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Payload
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/controller.UpdateProductRequest'
+          $ref: '#/definitions/model.ProductAPI'
       produces:
       - application/json
       responses:
@@ -210,6 +250,155 @@ paths:
       summary: Update product
       tags:
       - products
+  /stocks:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Stock'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all current stock levels
+      tags:
+      - stocks
+  /stocks/histories:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.StockHistory'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all stock movement history
+      tags:
+      - stock-histories
+  /stocks/histories/product/{product_id}:
+    get:
+      parameters:
+      - description: Product ID
+        format: uuid
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.StockHistory'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List stock movement history for a product
+      tags:
+      - stock-histories
+  /stocks/movement:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Movement payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.StockMovementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.StockMovementResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Record a stock IN or OUT movement
+      tags:
+      - stocks
+  /stocks/product/{product_id}:
+    get:
+      parameters:
+      - description: Product ID
+        format: uuid
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Stock'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current stock level for a product
+      tags:
+      - stocks
 schemes:
 - http
 swagger: "2.0"

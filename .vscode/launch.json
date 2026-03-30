@@ -5,8 +5,9 @@
       "name": "Launch API",
       "type": "go",
       "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}",
+      "mode": "debug",
+      "buildFlags": "-gcflags=all=-dwarf=4",
+      "program": "${workspaceFolder}/main.go",
       "cwd": "${workspaceFolder}"
     }
   ]
