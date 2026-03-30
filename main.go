@@ -4,7 +4,7 @@ import (
 	"javan-inventory-barang/config"
 	"javan-inventory-barang/routes"
 	"javan-inventory-barang/services"
-	"javan-inventory-barang/utils"
+	"javan-inventory-barang/utils/env"
 	"log"
 
 	_ "javan-inventory-barang/docs"
@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	if err := utils.InitConfig(config.Environment); err != nil {
+	if err := env.InitConfig(config.Environment); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -28,7 +28,6 @@ func init() {
 // @schemes http
 // @BasePath /api/v1
 func main() {
-
 	app := fiber.New()
 	service := services.NewService()
 	routes.Handle(app, service)
