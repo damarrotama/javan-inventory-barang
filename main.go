@@ -1,6 +1,7 @@
 package main
 
 import (
+	"javan-inventory-barang/config"
 	"javan-inventory-barang/routes"
 	"javan-inventory-barang/services"
 	"javan-inventory-barang/utils"
@@ -13,7 +14,7 @@ import (
 )
 
 func init() {
-	if err := utils.InitConfig(); err != nil {
+	if err := utils.InitConfig(config.Environment); err != nil {
 		log.Fatal(err)
 	}
 }

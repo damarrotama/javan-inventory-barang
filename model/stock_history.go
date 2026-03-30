@@ -1,19 +1,16 @@
 package model
 
-import (
-	"time"
-)
+import "github.com/google/uuid"
 
 type StockHistory struct {
-	ID            int64             `db:"id"`
-	ProductID     int64             `db:"product_id"`
-	StockID       *int64            `db:"stock_id"`
-	MovementType  StockMovementType `db:"movement_type"`
-	QuantityDelta float64           `db:"quantity_delta"`
-	QuantityAfter float64           `db:"quantity_after"`
-	Reference     *string           `db:"reference"`
-	Note          *string           `db:"note"`
-	CreatedAt     time.Time         `db:"created_at"`
+	Base
+	ProductID     *uuid.UUID        `gorm:"not null;index" json:"product_id"`
+	StockID       *uuid.UUID        `gorm:"index" json:"stock_id,omitempty"`
+	MovementType  StockMovementType `gorm:"type:varchar(32);not null;index" json:"movement_type"`
+	QuantityDelta float64           `gorm:"not null" json:"quantity_delta"`
+	QuantityAfter float64           `gorm:"not null" json:"quantity_after"`
+	Reference     *string           `gorm:"type:varchar(255)" json:"reference,omitempty"`
+	Note          *string           `gorm:"type:text" json:"note,omitempty"`
 }
 
 type StockMovementType string

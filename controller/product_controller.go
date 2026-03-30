@@ -4,10 +4,10 @@ import (
 	"errors"
 	"javan-inventory-barang/domain"
 	"javan-inventory-barang/model"
-	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -116,10 +116,6 @@ func (c *productController) CreateProduct(ctx *fiber.Ctx) error {
 // @Failure 500 {object} map[string]string
 // @Router /products/{id} [put]
 func (c *productController) UpdateProduct(ctx *fiber.Ctx) error {
-	id, err := parseIDParam(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
-	}
 	var req UpdateProductRequest
 	if err := ctx.BodyParser(&req); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid json"})
@@ -130,13 +126,6 @@ func (c *productController) UpdateProduct(ctx *fiber.Ctx) error {
 	unit := strings.TrimSpace(req.Unit)
 	if unit == "" {
 		unit = "pcs"
-	}
-	p := &model.Product{
-		ID:          id,
-		SKU:         strings.TrimSpace(req.SKU),
-		Name:        strings.TrimSpace(req.Name),
-		Description: req.Description,
-		Unit:        unit,
 	}
 	if err := c.productDomain.UpdateProduct(ctx.UserContext(), p); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -170,7 +159,11 @@ func (c *productController) DeleteProduct(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusNoContent)
 }
 
-func parseIDParam(ctx *fiber.Ctx) (int64, error) {
+func parseIDParam(ctx *fiber.Ctx) (*uuid.UUID, error) {
 	raw := ctx.Params("id")
-	return strconv.ParseInt(raw, 10, 64)
+	id, err := uuid.Parse(raw)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
 }
