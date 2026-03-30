@@ -19,7 +19,7 @@ func Handle(app *fiber.App, service *services.Service) {
 	productAPI := api.Group("/products")
 	productAPI.Get("/", productController.GetProducts)
 	// productAPI.Get("/:id", controller.GetProductById)
-	// productAPI.Post("/", controller.CreateProduct)
+	productAPI.Post("/", productController.AddProducts)
 	// productAPI.Put("/:id", controller.UpdateProduct)
 	// productAPI.Delete("/:id", controller.DeleteProduct)
 	stockAPI := api.Group("/stocks")
