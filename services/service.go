@@ -6,6 +6,7 @@ import (
 	"javan-inventory-barang/repository"
 	"javan-inventory-barang/transaction"
 	"javan-inventory-barang/utils/database"
+	"javan-inventory-barang/utils/logger"
 	"log"
 )
 
@@ -29,6 +30,11 @@ type Repository struct {
 
 // NewService wires repositories, domain, and controllers to a shared DB pool.
 func NewService() *Service {
+	logger, err := logger.NewLogger()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	db, err := database.OpenPostgres()
 	if err != nil {
 		log.Fatal(err)
@@ -37,10 +43,10 @@ func NewService() *Service {
 	txManager := transaction.NewManager(db)
 
 	// repositories
-	productRepo := repository.NewProductRepository(db)
+	productRepo := repository.NewProductRepository(logger, db)
 
 	// domains
-	productDomain := domain.NewProductDomain(txManager, productRepo)
+	productDomain := domain.NewProductDomain(logger, txManager, productRepo)
 
 	// controllers
 	productController := controller.NewProductController(productDomain)

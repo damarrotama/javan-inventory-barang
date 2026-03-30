@@ -8,6 +8,7 @@ import (
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/repository"
 	"javan-inventory-barang/transaction"
+	"javan-inventory-barang/utils/logger"
 	"javan-inventory-barang/utils/resp"
 )
 
@@ -21,13 +22,14 @@ type ProductDomain interface {
 }
 
 type productDomain struct {
+	logger    logger.Logger
 	txManager transaction.Manager
 	repo      repository.ProductRepository
 }
 
 // NewProductDomain constructs a ProductDomain.
-func NewProductDomain(txManager transaction.Manager, repo repository.ProductRepository) ProductDomain {
-	return &productDomain{txManager: txManager, repo: repo}
+func NewProductDomain(logger logger.Logger, txManager transaction.Manager, repo repository.ProductRepository) ProductDomain {
+	return &productDomain{logger: logger, txManager: txManager, repo: repo}
 }
 
 func (d *productDomain) GetProducts(ctx context.Context) ([]model.Product, error) {
