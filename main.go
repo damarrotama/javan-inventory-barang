@@ -25,6 +25,7 @@ func main() {
 
 	service := services.NewService()
 
+	viper.SetDefault("PORT", 8000)
 	routes.Handle(app, service)
 	if err := app.Listen(":" + viper.GetString("PORT")); err != nil {
 		log.Fatal(err)

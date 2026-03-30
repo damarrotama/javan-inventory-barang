@@ -13,15 +13,21 @@ type Service struct {
 }
 
 type Controller struct {
-	ProductController controller.ProductController
+	ProductController      controller.ProductController
+	StockController        controller.StockController
+	StockHistoryController controller.StockHistoryController
 }
 
 type Domain struct {
-	ProductDomain domain.ProductDomain
+	ProductDomain      domain.ProductDomain
+	StockDomain        domain.StockDomain
+	StockHistoryDomain domain.StockHistoryDomain
 }
 
 type Repository struct {
-	ProductRepository repository.ProductRepository
+	ProductRepository      repository.ProductRepository
+	StockRepository        repository.StockRepository
+	StockHistoryRepository repository.StockHistoryRepository
 }
 
 func NewService() *Service {
