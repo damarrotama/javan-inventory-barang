@@ -4,9 +4,9 @@ import (
 	"javan-inventory-barang/controller"
 	"javan-inventory-barang/domain"
 	"javan-inventory-barang/repository"
-	"javan-inventory-barang/transaction"
 	"javan-inventory-barang/utils/database"
 	"javan-inventory-barang/utils/logger"
+	"javan-inventory-barang/utils/transaction"
 	"log"
 )
 
