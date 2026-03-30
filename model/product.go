@@ -3,6 +3,10 @@ package model
 // Product maps to the products table.
 type Product struct {
 	Base
+	ProductAPI
+}
+type ProductAPI struct {
+	Base
 	SKU         string  `gorm:"type:varchar(64);uniqueIndex;not null" json:"sku"`
 	Name        string  `gorm:"type:varchar(255);not null;index" json:"name"`
 	Description *string `gorm:"type:text" json:"description,omitempty"`

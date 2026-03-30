@@ -3,11 +3,10 @@ package controller
 import (
 	"errors"
 	"javan-inventory-barang/domain"
+	"javan-inventory-barang/lib"
 	"javan-inventory-barang/model"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -55,18 +54,14 @@ func (c *productController) GetProducts(ctx *fiber.Ctx) error {
 // @Failure 500 {object} map[string]string
 // @Router /products/{id} [get]
 func (c *productController) GetProductByID(ctx *fiber.Ctx) error {
-	id, err := parseIDParam(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
-	}
-	p, err := c.productDomain.GetProductByID(ctx.UserContext(), id)
+	product, err := c.productDomain.GetProductByID(ctx.UserContext(), lib.ParamsUUID(ctx))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
 		}
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	return ctx.JSON(p)
+	return ctx.JSON(product)
 }
 
 // CreateProduct godoc
@@ -74,33 +69,22 @@ func (c *productController) GetProductByID(ctx *fiber.Ctx) error {
 // @Tags products
 // @Accept json
 // @Produce json
-// @Param body body CreateProductRequest true "Payload"
+// @Param body body model.ProductAPI true "Payload"
 // @Success 201 {object} model.Product
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /products [post]
 func (c *productController) CreateProduct(ctx *fiber.Ctx) error {
-	var req CreateProductRequest
-	if err := ctx.BodyParser(&req); err != nil {
+	api := new(model.ProductAPI)
+	if err := ctx.BodyParser(api); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid json"})
 	}
-	if strings.TrimSpace(req.SKU) == "" || strings.TrimSpace(req.Name) == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "sku and name are required"})
-	}
-	unit := strings.TrimSpace(req.Unit)
-	if unit == "" {
-		unit = "pcs"
-	}
-	p := &model.Product{
-		SKU:         strings.TrimSpace(req.SKU),
-		Name:        strings.TrimSpace(req.Name),
-		Description: req.Description,
-		Unit:        unit,
-	}
-	if err := c.productDomain.CreateProduct(ctx.UserContext(), p); err != nil {
+
+	product, err := c.productDomain.CreateProduct(ctx.UserContext(), api)
+	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(p)
+	return ctx.Status(fiber.StatusCreated).JSON(product)
 }
 
 // UpdateProduct godoc
@@ -116,35 +100,19 @@ func (c *productController) CreateProduct(ctx *fiber.Ctx) error {
 // @Failure 500 {object} map[string]string
 // @Router /products/{id} [put]
 func (c *productController) UpdateProduct(ctx *fiber.Ctx) error {
-	id, err := parseIDParam(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
-	}
-	var req UpdateProductRequest
-	if err := ctx.BodyParser(&req); err != nil {
+	api := new(model.ProductAPI)
+	if err := ctx.BodyParser(api); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid json"})
 	}
-	if strings.TrimSpace(req.SKU) == "" || strings.TrimSpace(req.Name) == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "sku and name are required"})
-	}
-	unit := strings.TrimSpace(req.Unit)
-	if unit == "" {
-		unit = "pcs"
-	}
-	p := &model.Product{
-		Base:        model.Base{ID: id},
-		SKU:         strings.TrimSpace(req.SKU),
-		Name:        strings.TrimSpace(req.Name),
-		Description: req.Description,
-		Unit:        unit,
-	}
-	if err := c.productDomain.UpdateProduct(ctx.UserContext(), p); err != nil {
+
+	product, err := c.productDomain.UpdateProduct(ctx.UserContext(), api, lib.ParamsUUID(ctx))
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
 		}
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	return ctx.JSON(p)
+	return ctx.JSON(product)
 }
 
 // DeleteProduct godoc
@@ -157,24 +125,11 @@ func (c *productController) UpdateProduct(ctx *fiber.Ctx) error {
 // @Failure 500 {object} map[string]string
 // @Router /products/{id} [delete]
 func (c *productController) DeleteProduct(ctx *fiber.Ctx) error {
-	id, err := parseIDParam(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
-	}
-	if err := c.productDomain.DeleteProduct(ctx.UserContext(), id); err != nil {
+	if err := c.productDomain.DeleteProduct(ctx.UserContext(), lib.ParamsUUID(ctx)); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
 		}
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return ctx.SendStatus(fiber.StatusNoContent)
-}
-
-func parseIDParam(ctx *fiber.Ctx) (*uuid.UUID, error) {
-	raw := ctx.Params("id")
-	id, err := uuid.Parse(raw)
-	if err != nil {
-		return nil, err
-	}
-	return &id, nil
 }

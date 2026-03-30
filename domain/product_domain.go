@@ -13,8 +13,8 @@ import (
 type ProductDomain interface {
 	GetProducts(ctx context.Context) ([]model.Product, error)
 	GetProductByID(ctx context.Context, id *uuid.UUID) (*model.Product, error)
-	CreateProduct(ctx context.Context, product *model.Product) error
-	UpdateProduct(ctx context.Context, product *model.Product) error
+	CreateProduct(ctx context.Context, api *model.ProductAPI) (*model.Product, error)
+	UpdateProduct(ctx context.Context, api *model.ProductAPI, id *uuid.UUID) (*model.Product, error)
 	DeleteProduct(ctx context.Context, id *uuid.UUID) error
 }
 
@@ -35,15 +35,28 @@ func (d *productDomain) GetProductByID(ctx context.Context, id *uuid.UUID) (*mod
 	return d.repo.FindById(ctx, id)
 }
 
-func (d *productDomain) CreateProduct(ctx context.Context, product *model.Product) error {
-	return d.repo.Create(ctx, product)
+func (d *productDomain) CreateProduct(ctx context.Context, api *model.ProductAPI) (*model.Product, error) {
+	product := &model.Product{
+		ProductAPI: *api,
+	}
+	if err := d.repo.Create(ctx, product); err != nil {
+		return nil, err
+	}
+	return product, nil
 }
 
-func (d *productDomain) UpdateProduct(ctx context.Context, product *model.Product) error {
-	if _, err := d.repo.FindById(ctx, product.ID); err != nil {
-		return err
+func (d *productDomain) UpdateProduct(ctx context.Context, api *model.ProductAPI, id *uuid.UUID) (*model.Product, error) {
+	product := &model.Product{
+		Base:       model.Base{ID: id},
+		ProductAPI: *api,
 	}
-	return d.repo.Update(ctx, product)
+	if _, err := d.repo.FindById(ctx, product.ID); err != nil {
+		return nil, err
+	}
+	if err := d.repo.Update(ctx, product); err != nil {
+		return nil, err
+	}
+	return product, nil
 }
 
 func (d *productDomain) DeleteProduct(ctx context.Context, id *uuid.UUID) error {
