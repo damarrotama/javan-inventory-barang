@@ -5,15 +5,16 @@ import (
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/transaction"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type ProductRepository interface {
 	FindAll(ctx context.Context) ([]model.Product, error)
-	FindById(ctx context.Context, id int64) (*model.Product, error)
+	FindById(ctx context.Context, id *uuid.UUID) (*model.Product, error)
 	Create(ctx context.Context, product *model.Product) error
 	Update(ctx context.Context, product *model.Product) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id *uuid.UUID) error
 
 	WithTx(tx transaction.Conn) ProductRepository
 }
@@ -38,7 +39,10 @@ func (r *productRepository) FindAll(ctx context.Context) ([]model.Product, error
 	return products, nil
 }
 
-func (r *productRepository) FindById(ctx context.Context, id int64) (*model.Product, error) {
+func (r *productRepository) FindById(ctx context.Context, id *uuid.UUID) (*model.Product, error) {
+	if id == nil {
+		return nil, gorm.ErrRecordNotFound
+	}
 	var product model.Product
 	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&product).Error; err != nil {
 		return nil, err
@@ -54,6 +58,9 @@ func (r *productRepository) Update(ctx context.Context, product *model.Product) 
 	return r.db.WithContext(ctx).Save(product).Error
 }
 
-func (r *productRepository) Delete(ctx context.Context, id int64) error {
+func (r *productRepository) Delete(ctx context.Context, id *uuid.UUID) error {
+	if id == nil {
+		return gorm.ErrRecordNotFound
+	}
 	return r.db.WithContext(ctx).Delete(&model.Product{}, id).Error
 }

@@ -2,6 +2,9 @@ package domain
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+
 	"javan-inventory-barang/model"
 	"javan-inventory-barang/repository"
 )
@@ -9,10 +12,10 @@ import (
 // ProductDomain defines product use cases.
 type ProductDomain interface {
 	GetProducts(ctx context.Context) ([]model.Product, error)
-	GetProductByID(ctx context.Context, id int64) (*model.Product, error)
+	GetProductByID(ctx context.Context, id *uuid.UUID) (*model.Product, error)
 	CreateProduct(ctx context.Context, product *model.Product) error
 	UpdateProduct(ctx context.Context, product *model.Product) error
-	DeleteProduct(ctx context.Context, id int64) error
+	DeleteProduct(ctx context.Context, id *uuid.UUID) error
 }
 
 type productDomain struct {
@@ -28,7 +31,7 @@ func (d *productDomain) GetProducts(ctx context.Context) ([]model.Product, error
 	return d.repo.FindAll(ctx)
 }
 
-func (d *productDomain) GetProductByID(ctx context.Context, id int64) (*model.Product, error) {
+func (d *productDomain) GetProductByID(ctx context.Context, id *uuid.UUID) (*model.Product, error) {
 	return d.repo.FindById(ctx, id)
 }
 
@@ -43,7 +46,7 @@ func (d *productDomain) UpdateProduct(ctx context.Context, product *model.Produc
 	return d.repo.Update(ctx, product)
 }
 
-func (d *productDomain) DeleteProduct(ctx context.Context, id int64) error {
+func (d *productDomain) DeleteProduct(ctx context.Context, id *uuid.UUID) error {
 	if _, err := d.repo.FindById(ctx, id); err != nil {
 		return err
 	}

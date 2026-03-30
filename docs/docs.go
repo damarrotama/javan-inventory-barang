@@ -109,7 +109,8 @@ const docTemplate = `{
                 "summary": "Get product by ID",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "Product ID",
                         "name": "id",
                         "in": "path",
@@ -165,7 +166,8 @@ const docTemplate = `{
                 "summary": "Update product",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "Product ID",
                         "name": "id",
                         "in": "path",
@@ -224,7 +226,8 @@ const docTemplate = `{
                 "summary": "Delete product",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "Product ID",
                         "name": "id",
                         "in": "path",
@@ -311,7 +314,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "name": {
                     "type": "string"
