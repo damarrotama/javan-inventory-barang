@@ -21,6 +21,7 @@ import (
 func main() {
 	app := fiber.New()
 	config.Connect()
+	config.RunMigration()
 
 	service := services.NewService()
 
