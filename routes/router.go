@@ -4,6 +4,7 @@ import (
 	"javan-inventory-barang/services"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 func Handle(app *fiber.App, service *services.Service) {
@@ -11,13 +12,15 @@ func Handle(app *fiber.App, service *services.Service) {
 		return c.SendString("Hello, World!")
 	})
 
+	app.Get("/swagger/*", swagger.HandlerDefault)
+
 	api := app.Group("/api/v1")
 
-	productController := service.Controller.ProductController
-	productAPI := api.Group("/products")
-	productAPI.Get("/", productController.GetProducts)
-	// productAPI.Get("/:id", controller.GetProductById)
-	// productAPI.Post("/", controller.CreateProduct)
-	// productAPI.Put("/:id", controller.UpdateProduct)
-	// productAPI.Delete("/:id", controller.DeleteProduct)
+	pc := service.Controller.ProductController
+	products := api.Group("/products")
+	products.Get("/", pc.GetProducts)
+	products.Post("/", pc.CreateProduct)
+	products.Get("/:id", pc.GetProductByID)
+	products.Put("/:id", pc.UpdateProduct)
+	products.Delete("/:id", pc.DeleteProduct)
 }
