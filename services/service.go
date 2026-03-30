@@ -5,7 +5,8 @@ import (
 	"javan-inventory-barang/domain"
 	"javan-inventory-barang/repository"
 	"javan-inventory-barang/transaction"
-	"javan-inventory-barang/utils"
+	"javan-inventory-barang/utils/database"
+	"javan-inventory-barang/utils/logger"
 	"log"
 )
 
@@ -33,20 +34,28 @@ type Repository struct {
 
 // NewService wires repositories, domain, and controllers to a shared DB pool.
 func NewService() *Service {
-	db, err := utils.OpenPostgres()
+	logger, err := logger.NewLogger()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := database.OpenPostgres()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	txManager := transaction.NewManager(db)
 
-	productRepo := repository.NewProductRepository(db)
-	stockRepo := repository.NewStockRepository(db)
-	stockHistoryRepo := repository.NewStockHistoryRepository(db)
+	// repositories
+	productRepo := repository.NewProductRepository(logger, db)
+	stockRepo := repository.NewStockRepository(logger, db)
+	stockHistoryRepo := repository.NewStockHistoryRepository(logger, db)
 
-	productDomain := domain.NewProductDomain(productRepo)
-	stockDomain := domain.NewStockDomain(stockRepo, stockHistoryRepo, productRepo, txManager)
+	// domains
+	productDomain := domain.NewProductDomain(logger, txManager, productRepo)
+	stockDomain := domain.NewStockDomain(logger, txManager, stockRepo, stockHistoryRepo, productRepo)
 
+	// controllers
 	productController := controller.NewProductController(productDomain)
 	stockController := controller.NewStockController(stockDomain)
 
