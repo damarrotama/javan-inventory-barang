@@ -8,7 +8,7 @@ CREATE TABLE stock_history (
     stock_id        BIGINT REFERENCES stock (id) ON DELETE SET NULL,
     movement_type   stock_movement_type NOT NULL,
     quantity_delta  NUMERIC(18, 4) NOT NULL,
-    quantity_after  NUMERIC(18, 4),
+    quantity_after  NUMERIC(18, 4) NOT NULL,
     reference       VARCHAR(128),
     note            TEXT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
