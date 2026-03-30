@@ -1,6 +1,7 @@
 package main
 
 import (
+	"javan-inventory-barang/config"
 	"javan-inventory-barang/routes"
 	"javan-inventory-barang/services"
 	"log"
@@ -19,6 +20,7 @@ import (
 // @BasePath /api/v1
 func main() {
 	app := fiber.New()
+	config.Connect()
 
 	service := services.NewService()
 
