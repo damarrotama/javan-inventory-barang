@@ -24,4 +24,12 @@ func Handle(app *fiber.App, service *services.Service) {
 	products.Get("/:id", pc.GetProductByID)
 	products.Put("/:id", pc.UpdateProduct)
 	products.Delete("/:id", pc.DeleteProduct)
+
+	sc := service.Controller.StockController
+	stocks := api.Group("/stocks")
+	stocks.Get("/", sc.GetStocks)
+	stocks.Post("/movement", sc.MoveStock)
+	stocks.Get("/product/:product_id", sc.GetStockByProductID)
+	stocks.Get("/histories", sc.GetStockHistories)
+	stocks.Get("/histories/product/:product_id", sc.GetStockHistoriesByProductID)
 }
