@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-// StockHistory is a row in stock_history (append-only movement log).
 type StockHistory struct {
 	ID            int64             `db:"id"`
 	ProductID     int64             `db:"product_id"`
@@ -17,7 +16,6 @@ type StockHistory struct {
 	CreatedAt     time.Time         `db:"created_at"`
 }
 
-// StockMovementType matches PostgreSQL enum stock_movement_type.
 type StockMovementType string
 
 const (

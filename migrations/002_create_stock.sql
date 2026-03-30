@@ -1,4 +1,3 @@
--- Stock: current on-hand quantity per product (one row per product).
 
 CREATE TABLE stock (
     id          BIGSERIAL PRIMARY KEY,

@@ -1,4 +1,3 @@
--- Stock history: append-only log of every quantity change (receipts, sales, adjustments).
 
 CREATE TYPE stock_movement_type AS ENUM ('IN', 'OUT', 'ADJUSTMENT');
 

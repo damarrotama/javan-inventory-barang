@@ -2,7 +2,6 @@ package model
 
 import "time"
 
-// Product is a row in products (master catalog).
 type Product struct {
 	ID          int64     `db:"id"`
 	SKU         string    `db:"sku"`

@@ -1,6 +1,3 @@
--- Products: master data for items you track in inventory.
--- Adjust columns when you define the final product shape (SKU, category, etc.).
-
 CREATE TABLE products (
     id          BIGSERIAL PRIMARY KEY,
     sku         VARCHAR(64)  NOT NULL UNIQUE,
